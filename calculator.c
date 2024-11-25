@@ -28,11 +28,11 @@ int main() {
         } 
         else if (expr[i] == '+' || expr[i] == '-' || expr[i] == '*' || expr[i] == '/') 
         {
-            if (is_number) 
+            if (flg) 
             {
                 num_arr[n_in++] = dig; 
                 dig = 0; 
-                is_number = 0;
+                flg = 0;
             }
             op_arr[op_in++] = expr[i]; 
         } 
