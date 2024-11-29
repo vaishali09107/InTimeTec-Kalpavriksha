@@ -1,102 +1,102 @@
 #include <stdio.h>
 #include <ctype.h>
-#include <stdlib.h>
-
 int main()
 {
-    char expr[100];
-    printf("Enter mathematical expression: ");
-    scanf(" %[^\n]", expr);
-
-    int num_arr[100];
-    int n_in = 0;
+    char st[100];
+    printf("Enter the string: ");
+    scanf("%[^\n]",st);
+    int num_arr[100],ind_num=0;
     char op_arr[100];
-    int op_in = 0;
-
-    int dig = 0;
-    int flg = 0;
-    for(int i=0;expr[i]!='\0';i++)
+    int ind_op=0;
+    int dig=0;
+    int flg=0;
+    for (int i=0;st[i]!='\0';i++)
     {
-        if (isspace(expr[i]))
+        char c=st[i];
+        if(c==' ')
         {
             continue;
         }
-        else if(isdigit(expr[i]))
+        if(isdigit(c))
         {
-            dig=dig*10+(expr[i]-'0');
+            dig=dig*10+(c-'0');
             flg=1;
-        }
-        else if(expr[i]=='/'||expr[i]=='*'||expr[i]=='+'||expr[i]=='-')
-        {
-            if(flg)
-            {
-                num_arr[n_in++]=dig;
-                dig=0;
-                flg=0;
-            }
-            op_arr[op_in++]=expr[i];
         }
         else
         {
-            printf("Error: Invalid expression.",expr[i]);
-            return 1;
+            if(flg)
+            {
+                num_arr[ind_num++]=dig;
+                dig=0;
+                flg=0;
+            }
+            if(c=='+'||c=='-'||c=='*'||c=='/')
+            {
+                op_arr[ind_op++]=c;
+            }
+            else
+            {
+                printf("Invalid Expression.");
+                return 1;
+            }
         }
     }
     if(flg)
     {
-        num_arr[n_in++]=dig;
+        num_arr[ind_num++]=dig;
     }
-    for(int i=0;i<op_in;i++)
+    for(int j=0;j<ind_op;j++)
+    {
+        if(op_arr[j]=='/')
+        {
+            if(num_arr[j+1]==0)
+            {
+                printf("Zero division error.");
+            }
+            num_arr[j]=num_arr[j]/num_arr[j+1];
+            for(int k=j+1;k<ind_num-1;k++)
+            {
+                num_arr[k]=num_arr[k+1];
+            }
+            for(int l=j;l<ind_op-1;l++)
+            {
+                op_arr[l]=op_arr[l+1];
+            }
+            ind_num--;
+            ind_op--;
+            j--;
+        }
+    }
+    for(int i=0;i<ind_op;i++)
     {
         if(op_arr[i]=='*')
         {
-            num_arr[i]=num_arr[i]*num_arr[i + 1];
-            for(int j=i+1;j<n_in-1;j++)
+            num_arr[i]=num_arr[i]*num_arr[i+1];
+            for(int k=i+1;k<ind_num-1;k++)
             {
-                num_arr[j]=num_arr[j+1];
+                num_arr[k]=num_arr[k+1];
             }
-            for(int j=i;j<op_in-1;j++)
+            for(int l=i;l<ind_op-1;l++)
             {
-                op_arr[j]=op_arr[j+1];
+                op_arr[l]=op_arr[l+1];
             }
-            n_in--;
-            op_in--;
-            i--;
-        }
-        else if(op_arr[i]=='/')
-        {
-            if(num_arr[i+1]==0)
-            {
-                printf("Error: Division by zero.\n");
-                return 1;
-            }
-            num_arr[i]=num_arr[i]/num_arr[i+1];
-            for(int j=i+1;j<n_in-1;j++)
-            {
-                num_arr[j]=num_arr[j+1];
-            }
-            for(int j=i;j<op_in-1;j++)
-            {
-                op_arr[j]=op_arr[j+1];
-            }
-            n_in--;
-            op_in--;
+            ind_num--;
+            ind_op--;
             i--;
         }
     }
     int ans=num_arr[0];
-    for(int i=0;i<op_in;i++)
-    {
-        if(op_arr[i] == '+')
+        for(int i=0;i<ind_op;i++)
         {
-            ans+=num_arr[i+1];
+            if(op_arr[i]=='+')
+            {
+                ans=ans+num_arr[i+1];
+            }
+            else if(op_arr[i]=='-')
+            {
+                ans=ans-num_arr[i+1];
+            }
         }
-        else if(op_arr[i]=='-')
-        {
-            ans-=num_arr[i+1];
-        }
-    }
-
-    printf("ANS : %d\n", ans);
+    printf("Ans: %d\n",ans);
     return 0;
 }
