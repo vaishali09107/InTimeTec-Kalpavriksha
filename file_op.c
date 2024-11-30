@@ -51,6 +51,7 @@ void display_user()
     if(fp==NULL)
     {
         printf("Cannot open file.\n");
+        return;
     }
     if(fgetc(fp)==EOF)
     {
@@ -85,6 +86,7 @@ void update_user()
         {
             fclose(tfp);
         }
+        return;
     }
     printf("Please enter the id of the user you want to update: ");
     scanf("%d",&key);
@@ -98,24 +100,26 @@ void update_user()
             printf("Enter new name: ");
             scanf(" %[^\n]", us.name);
             printf("Enter new age: ");
-            scanf("%d", us.age);
+            scanf("%d", &us.age);
             flag=1;
         }
         fprintf(tfp, "%-10d %-15s %-10d\n", us.id, us.name, us.age);
-        fclose(fp);
-        fclose(tfp);
-        if(flag)
-        {
-            remove("users.txt");
-            rename("temp.txt", "users.txt");
-            printf("Record updated successfully.\n");
-        }
-        else
-        {
-            remove("temp.txt");
-            printf("Record not found.\n");
-        }
     }
+        
+    fclose(fp);
+    fclose(tfp);
+    if(flag)
+    {
+        remove("users.txt");
+        rename("temp.txt", "users.txt");
+        printf("Record updated successfully.\n");
+    }
+    else
+    {
+        remove("temp.txt");
+        printf("Record not found.\n");
+    }
+    
 }
 void delete_user()
 {
@@ -143,7 +147,7 @@ void delete_user()
     char start[256];
     fgets(start,sizeof(start),fp);
     fprintf(tfp,"%s",start);
-    while(fscanf(fp,"%d %s %d",&us.id,us.name,&us.age))
+    while(fscanf(fp,"%d %s %d",&us.id,us.name,&us.age)==3)
     {
         if(us.id==key)
         {
