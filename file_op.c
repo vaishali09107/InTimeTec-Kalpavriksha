@@ -4,110 +4,157 @@
 typedef struct 
 {
     int id;
-    char name[20];
+    char *name;
     int age;
 }user;
 void check_file()
 {
-    FILE *fp=fopen("users.txt","a");
-    if(fp==NULL)
+    FILE *file_pointer=fopen("users.txt","a");
+    if(file_pointer==NULL)
     {
         printf("Error in opening file.\n");
     }
-    fseek(fp,0,SEEK_END);
-    if(ftell(fp)==0)
+    fseek(file_pointer,0,SEEK_END);
+    if(ftell(file_pointer)==0)
     {
-        fprintf(fp,"%-10s %-15s %-10s\n","ID","Name","Age");
+        fprintf(file_pointer,"%-10s %-15s %-10s\n","ID","Name","Age");
     }
-    fclose(fp);
+    fclose(file_pointer);
 }
 void add_user()
 {
-    FILE *fp;
+    FILE *file_pointer;
     user us;
     check_file();
-    fp=fopen("users.txt","a");
-    if(fp==NULL)
+    file_pointer=fopen("users.txt","a");
+    if(file_pointer==NULL)
     {
         printf("Cannot open file.\n");
+    }
+    us.name=(char *)malloc(20 * sizeof(char));
+    if(us.name==NULL)
+    {
+        printf("Error in memory allocation for name.\n");
+        return;
     }
     printf("Enter the details of the user: \n");
     printf("ID: ");
     scanf("%d",&us.id);
     printf("Name: ");
-    scanf(" %[^\n]",us.name);
+    getchar();
+    int size = 0, capacity = 20;
+    char character;
+    while(scanf("%c", &character)==1 && character!='\n')
+    {
+        if(size>=capacity)
+        {
+            capacity*=2;
+            us.name=(char *)realloc(us.name, capacity * sizeof(char));
+            if(us.name==NULL)
+            {
+                printf("Memory Re-Allocation Failed.\n");
+                return;
+            }
+        }
+        us.name[size++]=character;
+    }
+    us.name[size] = '\0';
     printf("Age: ");
     scanf("%d",&us.age);
-    fprintf(fp,"%-10d %-15s %-10d\n",us.id,us.name,us.age);
-    fclose(fp);
+    fprintf(file_pointer,"%-10d %-15s %-10d\n",us.id,us.name,us.age);
+    fclose(file_pointer);
     printf("User record added sucessfully.");
+    free(us.name);
 }
 void display_user()
 {
-    FILE *fp;
+    FILE *file_pointer;
     char data[256];
     check_file();
-    fp=fopen("users.txt","r");
-    if(fp==NULL)
+    file_pointer=fopen("users.txt","r");
+    if(file_pointer==NULL)
     {
         printf("Cannot open file.\n");
         return;
     }
-    if(fgetc(fp)==EOF)
+    if(fgetc(file_pointer)==EOF)
     {
         printf("File is empty.\n");
-        fclose(fp);
+        fclose(file_pointer);
     }
-    rewind(fp);
+    rewind(file_pointer);
     printf("User record: \n");
-    while(fgets(data,sizeof(data),fp))
+    while(fgets(data,sizeof(data),file_pointer))
     {
         printf("%s",data);
     }
-    fclose(fp);
+    fclose(file_pointer);
 }
 void update_user()
 {
-    FILE *fp ,*tfp;
+    FILE *file_pointer ,*temp_file_pointer;
     user us;
     int key;
     int flag=0;
     check_file();
-    fp=fopen("users.txt","r");
-    tfp=fopen("temp.txt","w");
-    if(fp==NULL || tfp==NULL)
+    file_pointer=fopen("users.txt","r");
+    temp_file_pointer=fopen("temp.txt","w");
+    if(file_pointer==NULL || temp_file_pointer==NULL)
     {
         printf("Cannot open file.\n");
-        if(fp)
+        if(file_pointer)
         {
-            fclose(fp);
+            fclose(file_pointer);
         }
-        if(tfp)
+        if(temp_file_pointer)
         {
-            fclose(tfp);
+            fclose(temp_file_pointer);
         }
+        return;
+    }
+    us.name=(char *)malloc(20 * sizeof(char));
+    if(us.name==NULL)
+    {
+        printf("Error in memory allocation for name.\n");
         return;
     }
     printf("Please enter the id of the user you want to update: ");
     scanf("%d",&key);
     char start[256];
-    fgets(start,sizeof(start),fp);
-    fprintf(tfp,"%s",start);
-    while(fscanf(fp,"%d %s %d", &us.id, us.name, &us.age) == 3)
+    fgets(start,sizeof(start),file_pointer);
+    fprintf(temp_file_pointer,"%s",start);
+    while(fscanf(file_pointer,"%d %s %d", &us.id, us.name, &us.age) == 3)
     {
         if(us.id==key)
         {
             printf("Enter new name: ");
-            scanf(" %[^\n]", us.name);
+            getchar();
+            int size = 0, capacity = 20;
+            char character;
+            while(scanf("%c", &character)==1 && character!='\n')
+            {
+                if(size>=capacity)
+                {
+                    capacity*=2;
+                    us.name=(char *)realloc(us.name, capacity * sizeof(char));
+                    if(us.name==NULL)
+                    {
+                        printf("Memory Re-Allocation Failed.\n");
+                        return;
+                    }
+                }
+                us.name[size++]=character;
+            }
+            us.name[size] = '\0';
             printf("Enter new age: ");
             scanf("%d", &us.age);
             flag=1;
         }
-        fprintf(tfp, "%-10d %-15s %-10d\n", us.id, us.name, us.age);
+        fprintf(temp_file_pointer, "%-10d %-15s %-10d\n", us.id, us.name, us.age);
     }
         
-    fclose(fp);
-    fclose(tfp);
+    fclose(file_pointer);
+    fclose(temp_file_pointer);
     if(flag)
     {
         remove("users.txt");
@@ -119,35 +166,42 @@ void update_user()
         remove("temp.txt");
         printf("Record not found.\n");
     }
+    free(us.name);
     
 }
 void delete_user()
 {
-    FILE *fp,*tfp;
+    FILE *file_pointer,*temp_file_pointer;
     user us;
     int key;
     int flag=0;
     check_file();
-    fp=fopen("users.txt","r");
-    tfp=fopen("temp.txt","w");
-    if(fp==NULL || tfp==NULL)
+    file_pointer=fopen("users.txt","r");
+    temp_file_pointer=fopen("temp.txt","w");
+    if(file_pointer==NULL || temp_file_pointer==NULL)
     {
         printf("Cannot open file.\n");
-        if(fp)
+        if(file_pointer)
         {
-            fclose(fp);
+            fclose(file_pointer);
         }
-        if(tfp)
+        if(temp_file_pointer)
         {
-            fclose(tfp);
+            fclose(temp_file_pointer);
         }
+    }
+    us.name=(char *)malloc(20 * sizeof(char));
+    if(us.name==NULL)
+    {
+        printf("Error in memory allocation for name.\n");
+        return;
     }
     printf("Please enter the id of the user you want to delete: ");
     scanf("%d",&key);
     char start[256];
-    fgets(start,sizeof(start),fp);
-    fprintf(tfp,"%s",start);
-    while(fscanf(fp,"%d %s %d",&us.id,us.name,&us.age)==3)
+    fgets(start,sizeof(start),file_pointer);
+    fprintf(temp_file_pointer,"%s",start);
+    while(fscanf(file_pointer,"%d %s %d",&us.id,us.name,&us.age)==3)
     {
         if(us.id==key)
         {
@@ -156,11 +210,11 @@ void delete_user()
         }
         else
         {
-            fprintf(tfp,"%-10d %-15s %-10d\n",us.id,us.name,us.age);
+            fprintf(temp_file_pointer,"%-10d %-15s %-10d\n",us.id,us.name,us.age);
         }
     }
-    fclose(fp);
-    fclose(tfp);
+    fclose(file_pointer);
+    fclose(temp_file_pointer);
     if(flag)
     {
         remove("users.txt");
@@ -172,6 +226,7 @@ void delete_user()
         remove("temp.txt");
         printf("Record not found.\n");
     } 
+    free(us.name);
 }
 int main()
 {
@@ -210,7 +265,3 @@ int main()
     } while (choice!=5);
     return 0;
 }
-
-
-
-
