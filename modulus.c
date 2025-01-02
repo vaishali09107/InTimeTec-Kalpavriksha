@@ -1,11 +1,12 @@
 #include<stdio.h>
 #include<stdlib.h>
-void validateInput(int result) 
+int validateInput(int result) 
 {
     if (result != 1) {
-        printf("Wrong Value.\n");
-        exit(1);
+        printf("Invalid input.\n");
+        return 0;
     }
+    return 1;
 }
 long long calculate_result(long long base,long long exponent,long long modulus)
 {
@@ -26,26 +27,22 @@ int main()
 {
     long long  Base,Exponent,Modulus,final_answer;
     printf("Enter Base: ");
-    validateInput(scanf("%lld", &Base));
+    if(!validateInput(scanf("%lld",&Base))||Base<=0)
+    {
+        printf("Base should be positive integer.\n");
+        return 1;
+    }
     printf("Enter Exponent: ");
-    validateInput(scanf("%lld", &Exponent));
+    if(!validateInput(scanf("%lld",&Exponent))||Exponent<0)
+    {
+        printf("Exponent should be positive integer.\n");
+        return 1;
+    }
     printf("Enter Modulus: ");
-    validateInput(scanf("%lld", &Modulus));
-
-    if (Base<0)
+    if(!validateInput(scanf("%lld",&Modulus))||Modulus<=1)
     {
-        printf("Base should be greater than Zero.\n");
-        exit(1);
-    }
-    if (Exponent<0)
-    {
-        printf("Exponent should be greater than Zero.\n");
-        exit(1);
-    }
-    if (Modulus<=1)
-    {
-        printf("Modulus should be greater than or equlas to one.\n");
-        exit(1);
+        printf("Modulus should be greater than 1.\n");
+        return 1;
     }
     final_answer=calculate_result(Base,Exponent,Modulus);
     printf("Answer: %lld\n", final_answer);
